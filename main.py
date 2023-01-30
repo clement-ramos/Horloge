@@ -1,6 +1,4 @@
 from tkinter import *
-from tkinter import ttk
-from tkinter import messagebox
 from datetime import datetime, timedelta
 
 #My sized fonts
@@ -31,7 +29,7 @@ def count_time():     # functions that count and put it in right form
     if count_bool:
         global current_time
         current_time += timedelta(seconds=1)
-        string = current_time.strftime('%H:%M:%S %p')
+        string = current_time.strftime('%H:%M:%S')
         current_time_label.config(text=string)
         current_time_label.after(1000, count_time)
         if current_time.strftime("%H:%M:%S") == alarm_time.strftime("%H:%M:%S"):    # Test if current time = Alarm
@@ -40,22 +38,40 @@ def count_time():     # functions that count and put it in right form
 
 def set_time():      # functions called on (Set Time) button
     global current_time
+    global mode
     hour = int(hour_entry.get())
     minute = int(min_entry.get())
     second = int(sec_entry.get())
     current_time = current_time.replace(hour=hour, minute=minute, second=second)
-    string = current_time.strftime('%H:%M:%S %p')
+    if mode == "AM":              
+        if hour >= 12:
+            current_time = current_time.replace(hour=(current_time.hour - 12) % 24) 
+            mode = "PM"  
+    elif mode == "PM":
+        if hour <= 12:
+            current_time = current_time.replace(hour=(current_time.hour) % 24) 
+            mode ="AM" 
+
+    mode_label.config(text=mode)
+    string = current_time.strftime('%H:%M:%S')
     current_time_label.config(text=string)
 
 
 def set_alarm():    # functions called on (Set Alarm) button
     global alarm_time
+    global mode
     hour = int(alarm_hour_entry.get())
     minute = int(alarm_min_entry.get())
     second = int(alarm_sec_entry.get())
     alarm_time = alarm_time.replace(hour=hour, minute=minute, second=second)
-    string = alarm_time.strftime('%H:%M:%S %p')
-    alarm_info_label.config(text=f"{string}")
+    if hour >= 12:
+        if mode == "PM":
+            alarm_time = alarm_time.replace(hour=(alarm_time.hour - 12) % 24) 
+        elif mode == "AM":
+            mode = "24h"
+    string = alarm_time.strftime('%H:%M:%S')
+    alarm_info_label.config(text=string)
+    mode_label.config(text=mode)
 
 #Change style to red and display message for 5s 
 def alarm():
@@ -66,18 +82,30 @@ def alarm():
 #Change to default style alarm
 def alarm_off():
     alarm_info_label.config(fg="black")
-    alarm_info_label.config(text=f"{alarm_time.strftime('%H:%M:%S %p')}")
+    alarm_info_label.config(text=f"{alarm_time.strftime('%H:%M:%S')}")
 
 
 #Switch AM to PM or PM to AM
 def mode_am_pm():
     global current_time
-    if current_time.strftime("%p") == "AM":
-        current_time = current_time.replace(hour=(current_time.hour+12) % 24)
+    global mode
+    if mode == "24h":
+        if current_time.hour >= 12:
+            current_time = current_time.replace(hour=(current_time.hour-12) % 24)
+            mode = "PM"
+        else:
+            current_time = current_time.replace(hour=(current_time.hour) % 24)
+            mode = "AM"
     else:
-        current_time = current_time.replace(hour=(current_time.hour-12) % 24)
-    string = current_time.strftime('%H:%M:%S %p')
+        if mode == "AM":
+            current_time = current_time.replace(hour=(current_time.hour) % 24)
+            mode = "24h"
+        else:
+            current_time = current_time.replace(hour=(current_time.hour + 12) % 24)
+            mode = "24h"      
+    string = current_time.strftime('%H:%M:%S')
     current_time_label.config(text=string)
+    mode_label.config(text=mode)
 
 
 """
@@ -91,6 +119,7 @@ gui.title("Clock")
 current_time = datetime.now()
 alarm_time = datetime.now()
 count_bool = True # Bool that allow me to stop counting
+mode = "24h"
 
 #Create my TOP Frame
 current_time_L_frame = LabelFrame(gui , text="Current Time", font=DEFAULT_FONT_STYLE)
@@ -99,6 +128,10 @@ current_time_L_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
 # Create an entry for the amount to convert
 current_time_label = Label(current_time_L_frame, font=TIME_FONT_STYLE)
 current_time_label.grid(row=1, column=1, padx=10, pady=20, sticky="nsew")
+
+mode_label = Label(current_time_L_frame, font=TIME_FONT_STYLE)
+mode_label.grid(row=1, column=2, padx=10, pady=20, sticky="nsew")
+mode_label.config(text=mode)
 
 Label(current_time_L_frame,text="Alarm Set At :").grid(row=2, column=0, padx=10)
 alarm_info_label = Label(current_time_L_frame)
