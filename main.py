@@ -45,11 +45,11 @@ def set_time():      # functions called on (Set Time) button
     current_time = current_time.replace(hour=hour, minute=minute, second=second)
     if mode == "AM":              
         if hour >= 12:
-            current_time = current_time.replace(hour=(current_time.hour - 12) % 24) 
+            current_time = current_time.replace(hour=(current_time.hour - 12) % 12) 
             mode = "PM"  
     elif mode == "PM":
         if hour <= 12:
-            current_time = current_time.replace(hour=(current_time.hour) % 24) 
+            current_time = current_time.replace(hour=(current_time.hour) % 12) 
             mode ="AM" 
 
     mode_label.config(text=mode)
@@ -91,10 +91,10 @@ def mode_am_pm():
     global mode
     if mode == "24h":
         if current_time.hour >= 12:
-            current_time = current_time.replace(hour=(current_time.hour-12) % 24)
+            current_time = current_time.replace(hour=(current_time.hour-12) % 12)
             mode = "PM"
         else:
-            current_time = current_time.replace(hour=(current_time.hour) % 24)
+            current_time = current_time.replace(hour=(current_time.hour) % 12)
             mode = "AM"
     else:
         if mode == "AM":
